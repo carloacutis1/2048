@@ -36,7 +36,9 @@ function spawnTile() {
 
 function swipe(dir) {
     // user swipes in a direction
+
     // rotate the board to call compressRow
+    
     return;
 }
 
@@ -47,11 +49,16 @@ function compressRow() {
 
 function checkWin() {
     // checks if the tile 2048 exists
-    return;
+
+    if (board.includes(2048)) return true;
+    return false;
 }
 
 function gameOver() {
     // checks if there are no open tiles left, returns t/f
+
+    if (board.includes(0)) return false;
+    return true;
 }
 
 function event() {
@@ -82,9 +89,9 @@ render();
 // on a key press, run the game loop passing the keypress to the func
 document.addEventListener('keydown', function(event) {
     // player swipes
-    if (event.key === 'ArrowUp' || event.key === 'w') swipe('up');
-    else if (event.key === 'ArrowDown' || event.key === 's') swipe('down');
-    else if (event.key === 'ArrowLeft' || event.key === 'a') swipe('left');
+    if      (event.key === 'ArrowUp'    || event.key === 'w') swipe('up');
+    else if (event.key === 'ArrowDown'  || event.key === 's') swipe('down');
+    else if (event.key === 'ArrowLeft'  || event.key === 'a') swipe('left');
     else if (event.key === 'ArrowRight' || event.key === 'd') swipe('right');
 
     // spawn in a new tile 
