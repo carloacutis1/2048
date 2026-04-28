@@ -31,20 +31,45 @@ function spawnTile() {
     // update board
     board[cell] = num;
     
-    return;
+}
+
+function rotate(b) {
+    // create a blank board
+    let result = Array(16).fill(0);
+    // loop through rows
+    for (let row = 0; row < 4; row++) {
+        // loop through columns
+        for (let col = 0; col < 4; col++) {
+            // set new board 
+            result[col * 4 + (3 - row)] = b[row * 4 + col];
+        }
+    }
+    // return the result
+    return result;
 }
 
 function swipe(dir) {
     // user swipes in a direction
 
-    // rotate the board to call compressRow
-    
-    return;
+    // number of times the table needs to rotate to compress to the left
+    let rot = { left: 0, down: 1, right: 2, up: 3 }[dir];
+
+    let b = board;
+
+    // rotate the number of times it needs to
+    for (let i = 0; i < rot; i++) b = rotate(b);
+
+    // compress to the left!
+    b = compressLeft(b);
+
+    // rotate back to how it was;
+    for (let i = 0; i < (4-rot) % 4; i++) b = rotate(b);
+
+    board = b;    
 }
 
-function compressRow() {
-    // compress one row to the left
-    return;
+function compressLeft(b) {
+    // compress rows to the left
 }
 
 function checkWin() {
@@ -54,6 +79,7 @@ function checkWin() {
     return false;
 }
 
+// will be more complex of a check: "if there are no valid moves" 
 function gameOver() {
     // checks if there are no open tiles left, returns t/f
 
