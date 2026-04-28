@@ -23,21 +23,13 @@ function spawnTile() {
         }
     }
     // now we can randomly select a spot from this array
-    // random between 0 and length of emptySpaces inc.
-    let cell = Math.floor(Math.random() * emptySpaces.length());
+    let cell = emptySpaces[Math.floor(Math.random() * emptySpaces.length)];
     
-    // set the board at the empty index to a 2 or 4
-    
-
-
-    // this will be VERY SLOW when the board gets full. Will need to wait until
-    // one of the few empty cells are chosen
-
-    // pick a random empty cell
-    // let cell = -1;
-    // while (board[cell] === 0 || cell === -1) {
-    //     cell = Math.floor(Math.random() * 16); // random between 0 and 15 inc.
-    // }
+    // set the board at the selected empty board index to a 2 or 4
+    // get a random choice of 2 or 4
+    let num = (Math.floor(Math.random() * 1234) % 2) + 2;
+    // update board
+    board[cell] = num;
     
     return;
 }
