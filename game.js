@@ -92,6 +92,7 @@ function compressRow(row) {
 
     let compressedRow = [0, 0, 0, 0];   // array of zeros for later
     let tempRow = []
+    let tempRow2 = [];
    
     // get non zero elements into proper places of array
     for (let i = 0; i < row.length; i++) {
@@ -100,14 +101,28 @@ function compressRow(row) {
         }
     }
 
+    // tempRow contains all non-zero elements
+
     // if adjacent nums, merge
 
+    // loop through tempRow
+    // if i == i+1 then write their sum to tempRow2
 
-    // repeat
+    for (let i = 0; i < tempRow.length; i++) {
+        if (!(i + 1 === tempRow.length)) {
+            if (tempRow[i] === tempRow[i + 1]) {
+                tempRow2.push(tempRow[i] * 2);
+                tempRow[i] = tempRow[i + 1] = 0;
+                i++;
+                continue;
+            } 
+        }
+        tempRow2.push(tempRow[i]);
+    }
 
     // write the non-zero values to their correct places in the array of zeros 
     for (let i = 0; i < compressedRow.length; i++) {
-        if (i < tempRow.length) compressedRow[i] = tempRow[i];
+        if (i < tempRow2.length) compressedRow[i] = tempRow2[i];
     }
 
     return compressedRow;
@@ -128,16 +143,12 @@ function gameOver() {
     return true;
 }
 
-function calcScore(b) {
-    
-}
-
 
 // create board, length 16
 
 let validResponses = ['w', 'a', 's', 'd', 'ArrowUp', 'ArrowDown', 'ArrowLeft', 'ArrowRight'];
 let board = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0];
-let prevBoard = [...board];
+let prevBoard = [];
 let score = 0;
 
 // x_pos is horizontal
@@ -168,6 +179,9 @@ document.addEventListener('keydown', function(event) {
         else if (event.key === 'ArrowDown'  || event.key === 's') swipe('down');
         else if (event.key === 'ArrowLeft'  || event.key === 'a') swipe('left');
         else if (event.key === 'ArrowRight' || event.key === 'd') swipe('right');
+
+        // update the score with the sum of all tiles.
+        // still haev to do this
 
         if (!prevBoard.every((v, i) => v === board[i])) {
             // spawn in a new tile after a valid swipe
