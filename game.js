@@ -84,10 +84,8 @@ function compress(b) {
     for (let i = 0; i < 4; i++) {
         row = b.slice(i * 4, 4 * (i + 1));
         compRow = compressRow(row);
+        compBoard = [...compBoard, ...compRow];
     }
-
-    compBoard = [...compBoard, ...compRow];
-
     return compBoard;
 }
 
@@ -164,7 +162,7 @@ render();
 document.addEventListener('keydown', function(event) {
     // player swipes
 
-    if (validResponse.includes(event.key)) {
+    if (validResponses.includes(event.key)) {
 
         if      (event.key === 'ArrowUp'    || event.key === 'w') swipe('up');
         else if (event.key === 'ArrowDown'  || event.key === 's') swipe('down');
