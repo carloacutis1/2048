@@ -1,20 +1,20 @@
 function render() {
-  const grid = document.getElementById('grid');
-  grid.innerHTML = '';                    // clear old tiles
-  board.forEach(value => {
-    const cell = document.createElement('div');
-    cell.className = 'cell';
-    cell.textContent = value !== 0 ? value : '';
-    grid.appendChild(cell);
-  });
-  document.getElementById('score').textContent = score;
+    const grid = document.getElementById('grid');
+    grid.innerHTML = '';                    // clear old tiles
+    board.forEach(value => {
+        const cell = document.createElement('div');
+        cell.className = 'cell';
+        cell.textContent = value !== 0 ? value : '';
+        grid.appendChild(cell);
+    });
+    document.getElementById('score').textContent = score;
 }
 
 function spawnTile() {
+
     // pick a random empty cell, place a 2 or 4
 
-    // create a duplicate board with only empty tiles 
-    // array of the indices of the empty spaces (0s) in board
+    // create an array with only the indices of the empty tiles 
     let emptySpaces = [];
     for (let i = 0; i < board.length; i++) {
         if (board[i] === 0) {   
@@ -52,24 +52,70 @@ function swipe(dir) {
     // user swipes in a direction
 
     // number of times the table needs to rotate to compress to the left
-    let rot = { left: 0, down: 1, right: 2, up: 3 }[dir];
+    let rot = { down: 1, right: 2, up: 3 }[dir];
 
-    let b = board;
+    if (rot < 0 || rot > 3) return;
+
+    let b = [...board];
 
     // rotate the number of times it needs to
     for (let i = 0; i < rot; i++) b = rotate(b);
 
     // compress to the left!
-    b = compressLeft(b);
+    b = compress(b);
 
     // rotate back to how it was;
-    for (let i = 0; i < (4-rot) % 4; i++) b = rotate(b);
+    for (let i = 0; i < (4 - rot) % 4; i++) b = rotate(b);
 
-    board = b;    
+    board = b;
+
+    // spawn in a new tile after a valid swipe
+    spawnTile();
 }
 
-function compressLeft(b) {
+function compress(b) {
     // compress rows to the left
+
+    let compBoard = [];
+    let row = [];
+    let compRow = [];
+
+    // go by row
+    for (let i = 0; i < 4; i++) {
+        row = b.slice(i * 4, 4 * (i + 1));
+        compRow = compressRow(row);
+    }
+
+    compBoard = [...compBoard, ...compRow];
+
+    return compBoard;
+}
+
+function compressRow(row) {
+
+    // filter zeros to the right ============================
+
+    let compressedRow = [0, 0, 0, 0];   // array of zeros for later
+    let tempRow = []
+   
+    // get non zero elements into proper places of array
+    for (let i = 0; i < row.length; i++) {
+        if (row[i] > 0) {
+            tempRow.push(row[i]);
+        }
+    }
+
+    // if adjacent nums, merge
+
+
+    // repeat
+
+    // write the non-zero values to their correct places in the array of zeros 
+    for (let i = 0; i < compressedRow.length; i++) {
+        if (i < tempRow.length) compressedRow[i] = tempRow[i];
+    }
+
+    return compressedRow;
 }
 
 function checkWin() {
@@ -94,7 +140,9 @@ function event() {
 
 // create board, length 16
 
+let validResponses = ['w', 'a', 's', 'd', 'ArrowUp', 'ArrowDown', 'ArrowLeft', 'ArrowRight'];
 let board = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0];
+let score = 0;
 
 // x_pos is horizontal
 // y_pos is vertical
@@ -115,18 +163,18 @@ render();
 // on a key press, run the game loop passing the keypress to the func
 document.addEventListener('keydown', function(event) {
     // player swipes
-    if      (event.key === 'ArrowUp'    || event.key === 'w') swipe('up');
-    else if (event.key === 'ArrowDown'  || event.key === 's') swipe('down');
-    else if (event.key === 'ArrowLeft'  || event.key === 'a') swipe('left');
-    else if (event.key === 'ArrowRight' || event.key === 'd') swipe('right');
 
-    // spawn in a new tile 
-    spawnTile();
-    // push changes to the web page
-    render();
+    if (validResponse.includes(event.key)) {
 
-    // check if the player wins or if the game is over
-    if (checkWin()) alert('You Win!');
-    if (gameOver()) alert('Game Over!');
+        if      (event.key === 'ArrowUp'    || event.key === 'w') swipe('up');
+        else if (event.key === 'ArrowDown'  || event.key === 's') swipe('down');
+        else if (event.key === 'ArrowLeft'  || event.key === 'a') swipe('left');
+        else if (event.key === 'ArrowRight' || event.key === 'd') swipe('right');
 
+        // push changes to the web page
+        render();
+
+        // check if the player wins or if the game is over
+        if (checkWin()) alert('You Win!');
+    }
 });
