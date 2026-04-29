@@ -52,7 +52,7 @@ function swipe(dir) {
     // user swipes in a direction
 
     // number of times the table needs to rotate to compress to the left
-    let rot = { down: 1, right: 2, up: 3 }[dir];
+    let rot = { left: 0, down: 1, right: 2, up: 3 }[dir];
 
     if (rot < 0 || rot > 3) return;
 
@@ -68,9 +68,6 @@ function swipe(dir) {
     for (let i = 0; i < (4 - rot) % 4; i++) b = rotate(b);
 
     board = b;
-
-    // spawn in a new tile after a valid swipe
-    spawnTile();
 }
 
 function compress(b) {
@@ -131,8 +128,8 @@ function gameOver() {
     return true;
 }
 
-function event() {
-
+function calcScore(b) {
+    
 }
 
 
@@ -140,6 +137,7 @@ function event() {
 
 let validResponses = ['w', 'a', 's', 'd', 'ArrowUp', 'ArrowDown', 'ArrowLeft', 'ArrowRight'];
 let board = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0];
+let prevBoard = [...board];
 let score = 0;
 
 // x_pos is horizontal
@@ -150,7 +148,7 @@ let score = 0;
 //           0 0 0 #
 //           0 0 0 0
 
-// arr_ind = x * y -1
+// arr_ind = x * y - 1
 
 // initialize the board with two tiles
 spawnTile();
@@ -164,10 +162,17 @@ document.addEventListener('keydown', function(event) {
 
     if (validResponses.includes(event.key)) {
 
+        prevBoard = board;
+
         if      (event.key === 'ArrowUp'    || event.key === 'w') swipe('up');
         else if (event.key === 'ArrowDown'  || event.key === 's') swipe('down');
         else if (event.key === 'ArrowLeft'  || event.key === 'a') swipe('left');
         else if (event.key === 'ArrowRight' || event.key === 'd') swipe('right');
+
+        if (!prevBoard.every((v, i) => v === board[i])) {
+            // spawn in a new tile after a valid swipe
+            spawnTile();
+        }
 
         // push changes to the web page
         render();
