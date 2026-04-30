@@ -14,11 +14,11 @@ function spawnTile() {
 
     // pick a random empty cell, place a 2 or 4
 
-    // create an array with only the indices of the empty tiles 
+    // create an array with only the 'indices' of the empty tiles 
     let emptySpaces = [];
     for (let i = 0; i < board.length; i++) {
         if (board[i] === 0) {   
-            // if a board space is empty, append its ind
+            // if a board space is empty, append its index
             emptySpaces.push(i);
         }
     }
@@ -26,11 +26,19 @@ function spawnTile() {
     let cell = emptySpaces[Math.floor(Math.random() * emptySpaces.length)];
     
     // set the board at the selected empty board index to a 2 or 4
-    // get a random choice of 2 or 4
-    let num = ((Math.floor(Math.random() * 1000) % 2) + 1) * 2;
-    // update board
+    // 2s spawn 90% and 4s spawn 10%
+
+    let num = 0;
+    let rand = Math.random() * 123 % 10;
+
+    // if rand is greater than 8, means its 10 percent, so make a 4
+    if (rand > 8) {
+        num = 4;
+    }
+    else num = 2;
+
+    // update the cell
     board[cell] = num;
-    
 }
 
 function rotate(b) {
@@ -52,11 +60,11 @@ function swipe(dir) {
     // user swipes in a direction
 
     // number of times the table needs to rotate to compress to the left
-    let rot = { left: 0, down: 1, right: 2, up: 3 }[dir];
+    let rot = { left: 0, down: 1, right: 2, up: 3 }[dir];   // map each string to a numerical value
 
-    if (rot < 0 || rot > 3) return;
+    if (rot < 0 || rot > 3) return;     // if you swipe left, no rotation needs to be done
 
-    let b = [...board];
+    let b = [...board];     // copy the board into b
 
     // rotate the number of times it needs to
     for (let i = 0; i < rot; i++) b = rotate(b);
@@ -67,23 +75,22 @@ function swipe(dir) {
     // rotate back to how it was;
     for (let i = 0; i < (4 - rot) % 4; i++) b = rotate(b);
 
+    // set the board equal to the new board
     board = b;
 }
 
 function compress(b) {
     // compress rows to the left
 
-    let compBoard = [];
-    let row = [];
-    let compRow = [];
+    let compBoard = row = compRow = [];
 
     // go by row
-    for (let i = 0; i < 4; i++) {
-        row = b.slice(i * 4, 4 * (i + 1));
-        compRow = compressRow(row);
-        compBoard = [...compBoard, ...compRow];
+    for (let i = 0; i < Math.sqrt(b.length); i++) { // loop through the rows
+        row = b.slice(i * 4, 4 * (i + 1));          // grab each row, 1 by 1
+        compRow = compressRow(row);                 // compress the row
+        compBoard = [...compBoard, ...compRow];     // append the compressed row to a new board
     }
-    return compBoard;
+    return compBoard;                               // return the new board
 }
 
 function compressRow(row) {
@@ -91,13 +98,12 @@ function compressRow(row) {
     // filter zeros to the right ============================
 
     let compressedRow = [0, 0, 0, 0];   // array of zeros for later
-    let tempRow = []
-    let tempRow2 = [];
+    let tempRow = tempRow2 = []
    
     // get non zero elements into proper places of array
-    for (let i = 0; i < row.length; i++) {
-        if (row[i] > 0) {
-            tempRow.push(row[i]);
+    for (let i = 0; i < row.length; i++) {  // loop through the values in the row
+        if (row[i] > 0) {                   // if they aren't 0 ...
+            tempRow.push(row[i]);           // ...append them to a temporary array
         }
     }
 
@@ -108,24 +114,24 @@ function compressRow(row) {
     // loop through tempRow
     // if i == i+1 then write their sum to tempRow2
 
-    for (let i = 0; i < tempRow.length; i++) {
-        if (!(i + 1 === tempRow.length)) {
-            if (tempRow[i] === tempRow[i + 1]) {
-                tempRow2.push(tempRow[i] * 2);
-                tempRow[i] = tempRow[i + 1] = 0;
-                i++;
-                continue;
+    for (let i = 0; i < tempRow.length; i++) {  // loop through non-zero elements
+        if (!(i + 1 === tempRow.length)) {      // catch index errors at the end of the row
+            if (tempRow[i] === tempRow[i + 1]) {// if there are adjacent tiles of the same value
+                tempRow2.push(tempRow[i] * 2);  // add the multiplied value to another array
+                tempRow[i] = tempRow[i + 1] = 0;// set the two values to zero to avoid double counting
+                i++;                            // skip the next value to avoid adding 0 to tempRow2
+                continue;                       // skip to the next iteration to ensure ....
             } 
         }
-        tempRow2.push(tempRow[i]);
+        tempRow2.push(tempRow[i]);              // ...this line is only run at the end
     }
 
     // write the non-zero values to their correct places in the array of zeros 
-    for (let i = 0; i < compressedRow.length; i++) {
-        if (i < tempRow2.length) compressedRow[i] = tempRow2[i];
-    }
+    for (let i = 0; i < compressedRow.length; i++) {            // loop through the 0-filled array
+        if (i < tempRow2.length) compressedRow[i] = tempRow2[i];// if i is within bounds, replace the
+    }                                                           // zero with the value
 
-    return compressedRow;
+    return compressedRow;   // finally return the compressed row
 }
 
 function checkWin() {
@@ -150,6 +156,7 @@ let validResponses = ['w', 'a', 's', 'd', 'ArrowUp', 'ArrowDown', 'ArrowLeft', '
 let board = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0];
 let prevBoard = [];
 let score = 0;
+let ignoreWin = false;
 
 // x_pos is horizontal
 // y_pos is vertical
@@ -167,14 +174,17 @@ spawnTile();
 
 render();
 
-// on a key press, run the game loop passing the keypress to the func
+// on a key press, run the game loop
 document.addEventListener('keydown', function(event) {
     // player swipes
 
+    // we only want to do things in the game on a valid key press
     if (validResponses.includes(event.key)) {
 
-        prevBoard = board;
+        prevBoard = board;  // keep track to see if the board changed
+                            // we only add another cell if the board changed
 
+        // pass each key press into the swipe function
         if      (event.key === 'ArrowUp'    || event.key === 'w') swipe('up');
         else if (event.key === 'ArrowDown'  || event.key === 's') swipe('down');
         else if (event.key === 'ArrowLeft'  || event.key === 'a') swipe('left');
@@ -183,15 +193,17 @@ document.addEventListener('keydown', function(event) {
         // update the score with the sum of all tiles.
         // still haev to do this
 
+        // spawn in a new tile after a valid swipe
         if (!prevBoard.every((v, i) => v === board[i])) {
-            // spawn in a new tile after a valid swipe
             spawnTile();
         }
 
         // push changes to the web page
         render();
 
-        // check if the player wins or if the game is over
-        if (checkWin()) alert('You Win!');
+        // check if the player wins
+        if (!ignoreWin) {
+            if (checkWin()) alert('You Win!');
+        }
     }
 });
