@@ -3,7 +3,7 @@ function render() {
     grid.innerHTML = '';                    // clear old tiles
     board.forEach(value => {
         const cell = document.createElement('div');
-        cell.className = 'cell';
+        cell.className = `cell val-${value}`;
         cell.textContent = value !== 0 ? value : '';
         grid.appendChild(cell);
     });
@@ -29,8 +29,7 @@ function spawnTile() {
     // 2s spawn 90% and 4s spawn 10%
 
     let num = 0;
-    let rand = Math.random() * 123 % 10;
-
+    let rand = (Math.random() * 123) % 10;
     // if rand is greater than 8, means its 10 percent, so make a 4
     if (rand > 8) {
         num = 4;
@@ -82,7 +81,9 @@ function swipe(dir) {
 function compress(b) {
     // compress rows to the left
 
-    let compBoard = row = compRow = [];
+    let compBoard = [];
+    let row = [];
+    let compRow = [];
 
     // go by row
     for (let i = 0; i < Math.sqrt(b.length); i++) { // loop through the rows
@@ -98,7 +99,7 @@ function compressRow(row) {
     // filter zeros to the right ============================
 
     let compressedRow = [0, 0, 0, 0];   // array of zeros for later
-    let tempRow = tempRow2 = []
+    let tempRow = [], tempRow2 = []
    
     // get non zero elements into proper places of array
     for (let i = 0; i < row.length; i++) {  // loop through the values in the row
@@ -149,24 +150,14 @@ function gameOver() {
     return true;
 }
 
-
 // create board, length 16
 
-let validResponses = ['w', 'a', 's', 'd', 'ArrowUp', 'ArrowDown', 'ArrowLeft', 'ArrowRight'];
+let validResponses = ['z', 'w', 'a', 's', 'd', 'ArrowUp', 'ArrowDown', 'ArrowLeft', 'ArrowRight'];
 let board = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0];
 let prevBoard = [];
 let score = 0;
 let ignoreWin = false;
 
-// x_pos is horizontal
-// y_pos is vertical
-
-// (4, 3) is 0 0 0 0
-//           0 0 0 0
-//           0 0 0 #
-//           0 0 0 0
-
-// arr_ind = x * y - 1
 
 // initialize the board with two tiles
 spawnTile();
@@ -181,6 +172,12 @@ document.addEventListener('keydown', function(event) {
     // we only want to do things in the game on a valid key press
     if (validResponses.includes(event.key)) {
 
+        // step back for debugging
+        if (event.key === 'z') {
+            board = [...prevBoard];
+            render();
+        }
+
         prevBoard = board;  // keep track to see if the board changed
                             // we only add another cell if the board changed
 
@@ -189,6 +186,7 @@ document.addEventListener('keydown', function(event) {
         else if (event.key === 'ArrowDown'  || event.key === 's') swipe('down');
         else if (event.key === 'ArrowLeft'  || event.key === 'a') swipe('left');
         else if (event.key === 'ArrowRight' || event.key === 'd') swipe('right');
+        
 
         // update the score with the sum of all tiles.
         // still haev to do this
@@ -204,6 +202,7 @@ document.addEventListener('keydown', function(event) {
         // check if the player wins
         if (!ignoreWin) {
             if (checkWin()) alert('You Win!');
+            ignoreWin = true;
         }
     }
 });
