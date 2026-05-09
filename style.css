@@ -3,15 +3,73 @@
   grid-template-columns: repeat(4, 200px);
   gap: 8px;
   margin-top: 20px;
+  background-color: #6a6a6a;
+  width: fit-content;
+  padding: 15px;
+  margin-left: auto;
+  margin-right: auto;
 }
 
 .cell {
   width: 200px;
   height: 200px;
-  background: #ccc;
+  background: #c7bebe;
   display: flex;
   align-items: center;
   justify-content: center;
   font-size: 4rem;
   font-weight: bold;
+}
+
+
+.val-2 {
+  background-color: #e8e8e8fd;
+}
+
+.val-4 {
+  background-color: #fff0d7;
+}
+
+.val-8 {
+  background-color: #ffdd92;
+}
+
+.val-16 {
+  background-color: #ffc15d;
+}
+
+.val-32 { 
+  background-color: #ff9c5e;
+}
+
+.val-64 {
+  background-color: #ff7676;
+}
+
+.val-128 {
+  background-color: #fff64a;
+}
+
+.val-256 {
+  background-color: #ffed88;
+}
+
+.val-512 {
+  background-color: #edff9f;
+}
+
+.val-1024 {
+  background-color: #e7ffab;
+}
+
+.val-2048 {
+  background-color: #aeffe3;
+}
+
+.val-4096 {
+  background-color: #91c6ff;
+}
+
+.val-8192 {
+  background-color: #bc96ff;
 }
