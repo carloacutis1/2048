@@ -28,13 +28,7 @@ function spawnTile() {
     // set the board at the selected empty board index to a 2 or 4
     // 2s spawn 90% and 4s spawn 10%
 
-    let num = 0;
-    let rand = (Math.random() * 123) % 10;
-    // if rand is greater than 8, means its 10 percent, so make a 4
-    if (rand > 8) {
-        num = 4;
-    }
-    else num = 2;
+    let num = Math.random() < 0.1 ? 4 : 2;  // 10% chance of a 4, otherwise a 2
 
     // update the cell
     board[cell] = num;
@@ -119,6 +113,7 @@ function compressRow(row) {
         if (!(i + 1 === tempRow.length)) {      // catch index errors at the end of the row
             if (tempRow[i] === tempRow[i + 1]) {// if there are adjacent tiles of the same value
                 tempRow2.push(tempRow[i] * 2);  // add the multiplied value to another array
+                score += tempRow[i] * 2;        // the merged tile's value is added to the score
                 tempRow[i] = tempRow[i + 1] = 0;// set the two values to zero to avoid double counting
                 i++;                            // skip the next value to avoid adding 0 to tempRow2
                 continue;                       // skip to the next iteration to ensure ....
@@ -142,28 +137,47 @@ function checkWin() {
     return false;
 }
 
-// will be more complex of a check: "if there are no valid moves" 
-function gameOver() {
-    // checks if there are no open tiles left, returns t/f
+function checkGameOver() {
+    // the game is over when there are no valid moves left, returns t/f
 
+    // if there is an empty tile, the player can still move
     if (board.includes(0)) return false;
+
+    // the board is full, so look for two equal tiles next to each other
+    for (let row = 0; row < 4; row++) {
+        for (let col = 0; col < 4; col++) {
+            let i = row * 4 + col;
+            if (col < 3 && board[i] === board[i + 1]) return false; // equal tile to the right
+            if (row < 3 && board[i] === board[i + 4]) return false; // equal tile below
+        }
+    }
+
+    // no empty tiles and no possible merges
     return true;
 }
 
-// create board, length 16
+function newGame() {
+    // reset everything and start with two tiles
+    board = Array(16).fill(0);
+    prevBoard = [];
+    prevScore = 0;
+    score = 0;
+    ignoreWin = false;
+
+    spawnTile();
+    spawnTile();
+    render();
+}
 
 let validResponses = ['z', 'w', 'a', 's', 'd', 'ArrowUp', 'ArrowDown', 'ArrowLeft', 'ArrowRight'];
-let board = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0];
+let board = [];
 let prevBoard = [];
 let score = 0;
+let prevScore = 0;
 let ignoreWin = false;
 
-
-// initialize the board with two tiles
-spawnTile();
-spawnTile();
-
-render();
+// set up the first game
+newGame();
 
 // on a key press, run the game loop
 document.addEventListener('keydown', function(event) {
@@ -172,37 +186,55 @@ document.addEventListener('keydown', function(event) {
     // we only want to do things in the game on a valid key press
     if (validResponses.includes(event.key)) {
 
-        // step back for debugging
+        // stop the arrow keys from scrolling the page
+        event.preventDefault();
+
+        // step back one move for debugging (only once a move has been made)
         if (event.key === 'z') {
-            board = [...prevBoard];
-            render();
+            if (prevBoard.length === 16) {
+                board = [...prevBoard];
+                score = prevScore;
+                render();
+            }
+            return;
         }
 
-        prevBoard = board;  // keep track to see if the board changed
-                            // we only add another cell if the board changed
+        // remember the board and score before the swipe, so we can tell
+        // whether the board changed and so 'z' can undo the move
+        let beforeBoard = board;
+        let beforeScore = score;
 
         // pass each key press into the swipe function
+        // (the score is updated inside compressRow as tiles merge)
         if      (event.key === 'ArrowUp'    || event.key === 'w') swipe('up');
         else if (event.key === 'ArrowDown'  || event.key === 's') swipe('down');
         else if (event.key === 'ArrowLeft'  || event.key === 'a') swipe('left');
         else if (event.key === 'ArrowRight' || event.key === 'd') swipe('right');
-        
-
-        // update the score with the sum of all tiles.
-        // still haev to do this
 
         // spawn in a new tile after a valid swipe
-        if (!prevBoard.every((v, i) => v === board[i])) {
-            spawnTile();
+        let boardChanged = false;
+        for (let i = 0; i < board.length; i++) {
+            if (beforeBoard[i] !== board[i]) { boardChanged = true; break; }
         }
+        if (!boardChanged) return;  // nothing moved, so nothing else to do
+
+        prevBoard = beforeBoard;
+        prevScore = beforeScore;
+        spawnTile();
 
         // push changes to the web page
         render();
 
-        // check if the player wins
-        if (!ignoreWin) {
-            if (checkWin()) alert('You Win!');
-            ignoreWin = true;
-        }
+        // wait a moment so the browser draws the board before the alert pops up
+        setTimeout(function() {
+            // check if the player wins (only announce it once per game)
+            if (!ignoreWin && checkWin()) {
+                ignoreWin = true;
+                alert('You Win!');
+            }
+
+            // check if the player has no moves left
+            if (checkGameOver()) alert('Game Over! Score: ' + score);
+        }, 50);
     }
 });
